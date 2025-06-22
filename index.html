@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Editor - Crop, Resize & Filter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes gradient-x {
+            0%, 100% {
+                background-size: 200% 200%;
+                background-position: left center;
+            }
+            50% {
+                background-size: 200% 200%;
+                background-position: right center;
+            }
+        }
+        
+        .animate-gradient-x {
+            animation: gradient-x 15s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .canvas-container {
+            max-width: 100%;
+            max-height: 600px;
+            overflow: auto;
+        }
+        
+        #imageCanvas {
+            max-width: 100%;
+            max-height: 600px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .crop-overlay {
+            position: absolute;
+            border: 2px dashed #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 animate-gradient-x min-h-screen">
+    <div class="container mx-auto max-w-7xl p-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                Advanced Image Editor
+            </h1>
+            <p class="text-white/80 text-lg">
+                Crop, resize, and apply filters to your images with ease
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Controls Panel -->
+            <div class="lg:col-span-1 space-y-4">
+                <!-- Upload Section -->
+                <div class="glass rounded-lg p-6">
+                    <h3 class="text-white text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Upload Image
+                    </h3>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <button onclick="document.getElementById('imageInput').click()" 
+                            class="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-lg px-4 py-2 btn">
+                        Choose Image
+                    </button>
+                </div>
+
+                <!-- Tools Section -->
+                <div id="toolsSection" class="glass rounded-lg p-6 hidden">
+                    <h3 class="text-white text-lg font-semibold mb-4">Tools</h3>
+                    <div class="space-y-3">
+                        <button id="cropBtn" class="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-lg px-4 py-2 btn flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a.997.997 0 01-1.414 0l-7-7A1.997 1.997 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            Crop Image
+                        </button>
+                        
+                        <button id="applyCropBtn" class="w-full bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 btn hidden">
+                            Apply Crop
+                        </button>
+                        
+                        <button id="resetBtn" class="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-lg px-4 py-2 btn flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Reset
+                        </button>
+                        
+                        <button id="downloadBtn" class="w-full bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 btn flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters & Resize Tabs -->
+                <div id="controlsSection" class="glass rounded-lg p-6 hidden">
+                    <div class="mb-4">
+                        <div class="flex bg-white/20 rounded-lg p-1">
+                            <button id="filtersTab" class="flex-1 py-2 px-4 rounded-md text-white bg-white/30 transition-all">
+                                Filters
+                            </button>
+                            <button id="resizeTab" class="flex-1 py-2 px-4 rounded-md text-white/70 hover:text-white transition-all">
+                                Resize
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters Panel -->
+                    <div id="filtersPanel" class="space-y-4">
+                        <div>
+                            <label class="text-white text-sm block mb-2">Brightness: <span id="brightnessValue">100</span>%</label>
+                            <input type="range" id="brightness" min="0" max="200" value="100" class="w-full slider">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Contrast: <span id="contrastValue">100</span>%</label>
+                            <input type="range" id="contrast" min="0" max="200" value="100" class="w-full slider">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Saturation: <span id="saturationValue">100</span>%</label>
+                            <input type="range" id="saturation" min="0" max="200" value="100" class="w-full slider">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Blur: <span id="blurValue">0</span>px</label>
+                            <input type="range" id="blur" min="0" max="10" value="0" step="0.1" class="w-full slider">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Sepia: <span id="sepiaValue">0</span>%</label>
+                            <input type="range" id="sepia" min="0" max="100" value="0" class="w-full slider">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Grayscale: <span id="grayscaleValue">0</span>%</label>
+                            <input type="range" id="grayscale" min="0" max="100" value="0" class="w-full slider">
+                        </div>
+                    </div>
+
+                    <!-- Resize Panel -->
+                    <div id="resizePanel" class="space-y-4 hidden">
+                        <div>
+                            <label class="text-white text-sm block mb-2">Width (px)</label>
+                            <input type="number" id="newWidth" class="w-full bg-white/20 border border-white/30 text-white placeholder-white/50 rounded-lg px-3 py-2">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white text-sm block mb-2">Height (px)</label>
+                            <input type="number" id="newHeight" class="w-full bg-white/20 border border-white/30 text-white placeholder-white/50 rounded-lg px-3 py-2">
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="aspectRatio" checked class="rounded">
+                            <label for="aspectRatio" class="text-white text-sm">Maintain aspect ratio</label>
+                        </div>
+                        
+                        <button id="applyResizeBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 btn">
+                            Apply Resize
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div class="lg:col-span-2">
+                <div class="glass rounded-lg p-6 h-full">
+                    <h3 class="text-white text-lg font-semibold mb-4">
+                        Canvas
+                        <span id="cropInstruction" class="text-red-300 text-sm ml-2 hidden">
+                            (Click and drag to select crop area)
+                        </span>
+                    </h3>
+                    <div class="flex items-center justify-center min-h-[500px]" id="canvasContainer">
+                        <div id="uploadPrompt" class="text-center text-white/60">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-lg">Upload an image to get started</p>
+                        </div>
+                        <div id="canvasWrapper" class="relative hidden">
+                            <canvas id="imageCanvas"></canvas>
+                            <div id="processingOverlay" class="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg hidden">
+                                <div class="text-white text-lg">Processing...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
