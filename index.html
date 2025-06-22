@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LXF0JVD1CD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LXF0JVD1CD');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Image Editor - Crop, Resize & Filter</title>
@@ -87,11 +96,18 @@
             background: rgba(255, 0, 0, 0.1);
             pointer-events: none;
         }
+        
+        /* For styling the 'How to Use' details/summary */
+        summary::marker {
+            content: '';
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 animate-gradient-x min-h-screen">
     <div class="container mx-auto max-w-7xl p-4">
-        <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-white mb-2 drop-shadow-lg">
                 Advanced Image Editor
@@ -101,10 +117,29 @@
             </p>
         </div>
 
+        <div class="mb-6 glass rounded-lg p-6">
+            <details>
+                <summary class="text-xl font-semibold text-white cursor-pointer flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    How to Use This Image Editor
+                </summary>
+                <div class="mt-4 text-white/80 space-y-2">
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><strong>Upload Image:</strong> Click the "Choose Image" button to select a picture from your computer.</li>
+                        <li><strong>Apply Edits:</strong> Once your image appears, use the controls on the left panel.
+                            <ul class="list-disc list-inside ml-5 mt-2 space-y-1">
+                                <li><strong>Filters:</strong> Adjust the sliders to change brightness, contrast, blur, and more. Changes are applied live.</li>
+                                <li><strong>Resize:</strong> Click the "Resize" tab, enter new dimensions, and hit "Apply Resize".</li>
+                                <li><strong>Crop:</strong> Click "Crop Image", then click and drag a box over your picture. Click "Apply Crop" to finish.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Save Your Work:</strong> Click "Download" to save the edited image. Use "Reset" to start over with the original image at any time.</li>
+                    </ol>
+                </div>
+            </details>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Controls Panel -->
             <div class="lg:col-span-1 space-y-4">
-                <!-- Upload Section -->
                 <div class="glass rounded-lg p-6">
                     <h3 class="text-white text-lg font-semibold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +154,6 @@
                     </button>
                 </div>
 
-                <!-- Tools Section -->
                 <div id="toolsSection" class="glass rounded-lg p-6 hidden">
                     <h3 class="text-white text-lg font-semibold mb-4">Tools</h3>
                     <div class="space-y-3">
@@ -150,7 +184,6 @@
                     </div>
                 </div>
 
-                <!-- Filters & Resize Tabs -->
                 <div id="controlsSection" class="glass rounded-lg p-6 hidden">
                     <div class="mb-4">
                         <div class="flex bg-white/20 rounded-lg p-1">
@@ -163,7 +196,6 @@
                         </div>
                     </div>
 
-                    <!-- Filters Panel -->
                     <div id="filtersPanel" class="space-y-4">
                         <div>
                             <label class="text-white text-sm block mb-2">Brightness: <span id="brightnessValue">100</span>%</label>
@@ -196,7 +228,6 @@
                         </div>
                     </div>
 
-                    <!-- Resize Panel -->
                     <div id="resizePanel" class="space-y-4 hidden">
                         <div>
                             <label class="text-white text-sm block mb-2">Width (px)</label>
@@ -220,7 +251,6 @@
                 </div>
             </div>
 
-            <!-- Canvas Area -->
             <div class="lg:col-span-2">
                 <div class="glass rounded-lg p-6 h-full">
                     <h3 class="text-white text-lg font-semibold mb-4">
@@ -247,6 +277,14 @@
             </div>
         </div>
     </div>
+
+    <footer class="text-center text-white/80 py-4">
+        <p>
+            <a href="privacy.html" class="hover:underline hover:text-white">Privacy Policy</a> |
+            <a href="terms.html" class="hover:underline hover:text-white">Terms of Use</a> |
+            <a href="contact.html" class="hover:underline hover:text-white">Contact</a>
+        </p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
